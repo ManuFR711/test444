@@ -88,21 +88,21 @@
     In production, this should go into a .js file
 -->
 <script type="text/javascript">
-    
     // find more available base-maps at: https://leaflet-extras.github.io/leaflet-providers/preview/
+    // these are the base-maps that are served from other providers
     var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
 	    maxZoom: 17,
 	    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
     });
     var TerrainBackground = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}{r}.png', {
-	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-	subdomains: 'abcd',
-	minZoom: 0,
-	maxZoom: 18,
-    opacity: 0.5
-});
+	    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	    subdomains: 'abcd',
+	    minZoom: 0,
+	    maxZoom: 18,
+        opacity: 0.5
+    });
 
-    // create custom marker style
+    // create custom marker style for the cities
     var markerOptions = {
         radius: 6,
         fillColor: "#ff7800",
@@ -136,12 +136,16 @@
             fillOpacity: 0.0
         }
     });
+    // The Rhine only
     var rhineLayer = L.geoJSON(rhine, {
         style: {
             color: "#00f",
             weight: 3
         }
     });
+    // the three countries in the area
+    // here you can see, how we can define different styles depending on 
+    // the properties of a feature
     var countryLayer = L.geoJSON(countries, {
         style: feature => {
             switch (feature.properties.NUTS0) {
@@ -151,6 +155,9 @@
             }
         }
     });
+
+    // As there are no 'Project data' so far, we assume that the small rivers are project
+    // data that needs to be toggled on and off. 
     var riverLayer = L.geoJSON(rivers, {
         style: {
             color: "#00f",
@@ -160,6 +167,7 @@
     });
 
     // collect everything for the base information
+    // this is a self-build project basemap
     projectBaseGroup = L.layerGroup([TerrainBackground, countryLayer, rhineLayer, regionLayer,  placeLayer]);
     
     // build the map and render
@@ -179,9 +187,18 @@
 //        "Terrain": TerrainBackground,
         "Rhine region": projectBaseGroup
     };
+    // this is where you would put the real project data
     var overlayMaps = {
         "Small rivers": riverLayer
     };
+
+    /*
+        Note: usually, you would put a number of elements
+        into the application. Like a toolbar-menu that contains 
+        Filters, Tools, whatsoever. These can call methods added here, 
+        that will e.g. change all the globally available layers above 
+        and place them back to the map.
+    */
 
     // add to the map
     L.control.layers(baseMaps, overlayMaps).addTo(m);
